@@ -33,7 +33,7 @@ app.post('/webhook', function (req, res) {
             }
         } else if (event.postback) {
             console.log("Postback received: " + JSON.stringify(event.postback));
-            sendMessage(event.sender.id, {text: "Echo thanks for the like!"});
+            sendMessage(event.sender.id, {text: "Thanks for the like!"});
         }        
     }
     res.sendStatus(200);
