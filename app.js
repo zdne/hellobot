@@ -11,12 +11,12 @@ app.listen(Config.port)
 console.log(`app listening on port ${Config.port}`)
 
 // API root
-app.get('/', function (req, res) {
+app.get('/', (req, res) => {
     res.send('this is the hello bot server')
 })
 
 // Facebook webhook verification
-app.get('/webhook', function (req, res) {
+app.get('/webhook', (req, res) => {
     if (req.query['hub.verify_token'] === FB_MESSENGER_VERIFY_TOKEN) {
         res.send(req.query['hub.challenge'])
     } else {
@@ -25,7 +25,7 @@ app.get('/webhook', function (req, res) {
 })
 
 // Handler for receiving events
-app.post('/webhook', function (req, res) {
+app.post('/webhook', (req, res) => {
     let entries = req.body.entry
 
     entries.forEach((entry) => {
@@ -61,13 +61,13 @@ app.post('/webhook', function (req, res) {
 // Handle incoming message
 function handleMessage(event) {
     
-    getProfile(event.sender.id, function (err, profie) {
+    getProfile(event.sender.id, (err, profie) => {
         if (err) {
             console.log(`error retrieving user profie: ${err}`)
             return
         }
                     
-        sendMessage(event.sender.id, { text: `Hello ${profie.first_name}!` }, function (err) {
+        sendMessage(event.sender.id, { text: `Hello ${profie.first_name}!` }, (err) => {
             if (err)
                 console.log(`error sending message: ${err}`)
         })        
