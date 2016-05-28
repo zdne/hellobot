@@ -1,3 +1,51 @@
+'use strict'
+const http = require('http')
+const Bot = require('messenger-bot')
+
+let bot = new Bot({
+    token: process.env.FB_PAGES_ACCESS_TOKEN,
+    verify: process.env.FB_MESSENGER_VERIFY_TOKEN
+})
+
+bot.on('error', (err) => {
+    console.log(err.message)
+})
+
+bot.on('message', (payload, reply) => {
+    let text = payload.message.text
+
+    bot.getProfile(payload.sender.id, (err, profile) => {
+        if (err) throw err
+
+        reply({ text }, (err) => {
+            if (err) throw err
+
+            console.log(`Echoed back to ${profile.first_name} ${profile.last_name}: ${text}`)
+        })
+    })
+})
+
+let app = express()
+
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({
+    extended: true
+}))
+
+app.get('/webhook', (req, res) => {
+    return bot._verify(req, res)
+})
+
+app.post('/webhook', (req, res) => {
+    bot._handleMessage(req.body)
+    res.end(JSON.stringify({ status: 'ok' }))
+})
+
+http.createServer(app).listen((process.env.PORT || 3000))
+
+
+
+/*
 var express = require('express');
 var bodyParser = require('body-parser');
 var request = require('request');
@@ -101,3 +149,4 @@ function kittenMessage(recipientId, text) {
     return false;
     
 };
+*/
