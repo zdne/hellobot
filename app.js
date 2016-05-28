@@ -31,7 +31,6 @@ app.get('/webhook', function (req, res) {
 
 // Handler for receiving events
 app.post('/webhook', function (req, res) {
-    console.log(JSON.stringify(req.body, " ", 2))
     let entries = req.body.entry
 
     entries.forEach((entry) => {
