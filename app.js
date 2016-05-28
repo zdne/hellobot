@@ -1,155 +1,139 @@
 'use strict'
-const http = require('http')
-const Bot = require('messenger-bot')
-const express = require('express')
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
+const request = require('request');
 
-let bot = new Bot({
-    token: process.env.FB_PAGES_ACCESS_TOKEN || "1234",
-    verify: process.env.FB_MESSENGER_VERIFY_TOKEN || "1234"
+var app = require('express')();
+
+const settings = {
+    port: process.env.PORT || 3000,
+    token: process.env.FB_PAGES_ACCESS_TOKEN || "0xdeadbeef",
+    verify: process.env.FB_MESSENGER_VERIFY_TOKEN || "0xdeadbeef"
+}
+
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
+app.listen(settings.port)
+console.log(`app listening on port ${settings.port}`)
+
+// API root
+app.get('/', function (req, res) {
+    res.send('this is the hello bot server')
 })
 
-bot.on('error', (err) => {
-    console.log(err.message)
+// Facebook webhook verification
+app.get('/webhook', function (req, res) {
+    if (req.query['hub.verify_token'] === FB_MESSENGER_VERIFY_TOKEN) {
+        res.send(req.query['hub.challenge'])
+    } else {
+        res.send('invalid verification token')
+    }
 })
 
-bot.on('message', (payload, reply) => {
-    let text = payload.message.text
+// Handler for receiving events
+app.post('/webhook', function (req, res) {
+    console.log(JSON.stringify(req.body, " ", 2))
+    let entries = req.body.entry
 
-    bot.getProfile(payload.sender.id, (err, profile) => {
-        if (err) throw err
+    entries.forEach((entry) => {
+        let events = entry.messaging
 
-        reply({ text }, (err) => {
-            if (err) throw err
+        events.forEach((event) => {
+            // handle inbound messages
+            if (event.message) {
+                handleMessage(event)
+            }
 
-            console.log(`Echoed back to ${profile.first_name} ${profile.last_name}: ${text}`)
+            // handle postbacks
+            if (event.postback) {
+                handlePostback(event)
+            }
+
+            // handle message delivered
+            // if (event.delivery) {
+            //     this._handleEvent('delivery', event)
+            // }
+
+            // handle authentication
+            // if (event.optin) {
+            //     this._handleEvent('authentication', event)
+            // }
         })
     })
+    
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    res.end(JSON.stringify({status: 'ok'}))
 })
 
-let app = express()
+// Handle incoming message
+function handleMessage(event) {
+    sendMessage(event.sender.id, {text: `${event.message.text}`})
+}
 
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({
-    extended: true
-}))
+function handlePostback(event) {
+    console.log('postback handle not implemented')
+}
 
-app.get('/webhook', (req, res) => {
-    return bot._verify(req, res)
-})
+// Generic function to send message
+function sendMessage(recipient, payload, cb) {
+    if (!cb) cb = Function.prototype
 
-app.post('/webhook', (req, res) => {
-    bot._handleMessage(req.body)
-    res.end(JSON.stringify({ status: 'ok' }))
-})
-
-const port = process.env.PORT || 3000
-http.createServer(app).listen(port)
-console.log('app running on http://localhost:' + port)
-
-
-/*
-var express = require('express');
-var bodyParser = require('body-parser');
-var request = require('request');
-var app = express();
-
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(bodyParser.json());
-app.listen((process.env.PORT || 3000));
-
-// Server frontpage
-app.get('/', function (req, res) {
-    res.send('This is Hello Bot Server');
-});
-
-// Facebook Webhook
-app.get('/webhook', function (req, res) {
-    if (req.query['hub.verify_token'] === 'hellobot_verify_token') {
-        res.send(req.query['hub.challenge']);
-    } else {
-        res.send('Invalid verify token');
-    }
-});
-
-
-// Handler for receiving messages
-app.post('/webhook', function (req, res) {
-    var events = req.body.entry[0].messaging;
-    for (i = 0; i < events.length; i++) {
-        var event = events[i];        
-        if (event.message && event.message.text) {
-            if (!kittenMessage(event.sender.id, event.message.text)) {
-                sendMessage(event.sender.id, {text: "Echo: " + event.message.text});
-            }
-        } else if (event.postback) {
-            console.log("Postback received: " + JSON.stringify(event.postback));
-            sendMessage(event.sender.id, {text: "Thanks for the like!"});
-        }        
-    }
-    res.sendStatus(200);
-});
-
-// Generic function sending messages
-function sendMessage(recipientId, message) {
     request({
-        url: 'https://graph.facebook.com/v2.6/me/messages',
-        qs: {access_token: process.env.FB_PAGES_ACCESS_TOKEN},
         method: 'POST',
+        uri: 'https://graph.facebook.com/v2.6/me/messages',
+        qs: {
+            access_token: settings.FB_PAGES_ACCESS_TOKEN
+        },
         json: {
-            recipient: {id: recipientId},
-            message: message,
+            recipient: { id: recipient },
+            message: payload
         }
-    }, function(error, response, body) {
-        if (error) {
-            console.log('Error sending message: ', error);
-        } else if (response.body.error) {
-            console.log('Error: ', response.body.error);
-        }
-    });
-};
+    }, (err, res, body) => {
+        if (err) return cb(err)
+        if (body.error) return cb(body.error)
+
+        cb(null, body)
+    })
+}
 
 // Send rich message with kitten
-function kittenMessage(recipientId, text) {
-    
-    text = text || "";
-    var values = text.split(' ');
-    
-    if (values.length === 3 && values[0] === 'kitten') {
-        if (Number(values[1]) > 0 && Number(values[2]) > 0) {
-            
-            var imageUrl = "https://placekitten.com/" + Number(values[1]) + "/" + Number(values[2]);
-            
-            message = {
-                "attachment": {
-                    "type": "template",
-                    "payload": {
-                        "template_type": "generic",
-                        "elements": [{
-                            "title": "Kitten",
-                            "subtitle": "Cute kitten picture",
-                            "image_url": imageUrl ,
-                            "buttons": [{
-                                "type": "web_url",
-                                "url": imageUrl,
-                                "title": "Show kitten"
-                                }, {
-                                "type": "postback",
-                                "title": "I like this",
-                                "payload": "User " + recipientId + " likes kitten " + imageUrl,
-                            }]
-                        }]
-                    }
-                }
-            };
-    
-            sendMessage(recipientId, message);
-            
-            return true;
-        }
-    }
-    
-    return false;
-    
-};
-*/
+// function kittenMessage(recipientId, text) {
+//     text = text || "";
+//     var values = text.split(' ');
+
+//     if (values.length === 3 && values[0] === 'kitten') {
+//         if (Number(values[1]) > 0 && Number(values[2]) > 0) {
+
+//             var imageUrl = "https://placekitten.com/" + Number(values[1]) + "/" + Number(values[2]);
+
+//             message = {
+//                 "attachment": {
+//                     "type": "template",
+//                     "payload": {
+//                         "template_type": "generic",
+//                         "elements": [{
+//                             "title": "Kitten",
+//                             "subtitle": "Cute kitten picture",
+//                             "image_url": imageUrl,
+//                             "buttons": [{
+//                                 "type": "web_url",
+//                                 "url": imageUrl,
+//                                 "title": "Show kitten"
+//                             }, {
+//                                     "type": "postback",
+//                                     "title": "I like this",
+//                                     "payload": "User " + recipientId + " likes kitten " + imageUrl,
+//                                 }]
+//                         }]
+//                     }
+//                 }
+//             };
+
+//             sendMessage(recipientId, message);
+
+//             return true;
+//         }
+//     }
+
+//     return false;
+
+// };
