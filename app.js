@@ -1,10 +1,12 @@
 'use strict'
 const http = require('http')
 const Bot = require('messenger-bot')
+const express = require('express')
+const bodyParser = require('body-parser')
 
 let bot = new Bot({
-    token: process.env.FB_PAGES_ACCESS_TOKEN,
-    verify: process.env.FB_MESSENGER_VERIFY_TOKEN
+    token: process.env.FB_PAGES_ACCESS_TOKEN || "1234",
+    verify: process.env.FB_MESSENGER_VERIFY_TOKEN || "1234"
 })
 
 bot.on('error', (err) => {
@@ -42,7 +44,7 @@ app.post('/webhook', (req, res) => {
 })
 
 http.createServer(app).listen((process.env.PORT || 3000))
-
+console.log('App running on http://localhost:' + port);
 
 
 /*
