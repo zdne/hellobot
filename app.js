@@ -1,9 +1,9 @@
 'use strict'
-const bodyParser = require('body-parser');
-const request = require('request');
+const bodyParser = require('body-parser')
+const request = require('request')
 const Config = require('./lib/config')
 
-var app = require('express')();
+var app = require('express')()
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
