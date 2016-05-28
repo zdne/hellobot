@@ -1,7 +1,7 @@
 'use strict'
 const bodyParser = require('body-parser')
-const request = require('request')
 const Config = require('./lib/config')
+const messenger = require('./lib/messenger')
 
 var app = require('express')()
 
@@ -58,16 +58,14 @@ app.post('/webhook', (req, res) => {
     res.end(JSON.stringify({ status: 'ok' }))
 })
 
-// Handle incoming message
 function handleMessage(event) {
-    
-    getProfile(event.sender.id, (err, profile) => {
+    messenger.getUserProfile(event.sender.id, (err, profile) => {
         if (err) {
             console.log(`error retrieving user profile: ${err}`)
             return
         }
                     
-        sendMessage(event.sender.id, { text: `Hello ${profile.first_name}!` }, (err) => {
+        messenger.sendMessage(event.sender.id, { text: `Hello ${profile.first_name}!` }, (err) => {
             if (err)
                 console.log(`error sending message: ${err}`)
         })        
@@ -76,45 +74,4 @@ function handleMessage(event) {
 
 function handlePostback(event) {
     console.log('postback handle not implemented')
-}
-
-// Generic function to send message
-function sendMessage(recipient, payload, cb) {
-    if (!cb) cb = Function.prototype
-
-    request({
-        method: 'POST',
-        uri: 'https://graph.facebook.com/v2.6/me/messages',
-        qs: {
-            access_token: Config.access_token
-        },
-        json: {
-            recipient: { id: recipient },
-            message: payload
-        }
-    }, (err, res, body) => {
-        if (err) return cb(err)
-        if (body.error) return cb(body.error)
-
-        cb(null, body)
-    })
-}
-
-function getProfile(id, cb) {
-    if (!cb) cb = Function.prototype
-
-    request({
-        method: 'GET',
-        uri: `https://graph.facebook.com/v2.6/${id}`,
-        qs: {
-            fields: 'first_name,last_name,profile_pic,locale,timezone,gender',
-            access_token: Config.access_token
-        },
-        json: true
-    }, (err, res, body) => {
-        if (err) return cb(err)
-        if (body.error) return cb(body.error)
-
-        cb(null, body)
-    })
 }
