@@ -58,17 +58,25 @@ app.post('/webhook', function (req, res) {
             // }
         })
     })
-    
+
     res.writeHead(200, { 'Content-Type': 'application/json' })
-    res.end(JSON.stringify({status: 'ok'}))
+    res.end(JSON.stringify({ status: 'ok' }))
 })
 
 // Handle incoming message
 function handleMessage(event) {
-    sendMessage(event.sender.id, {text: `${event.message.text}`}, function (err) {
-        if (err) 
-            console.log(`error sending message: ${err}`)
-    })
+    
+    getProfile(event.sender.id, function (err, profie) {
+        if (err) {
+            console.log(`error retrieving user profie: ${err}`)
+            return
+        }
+                    
+        sendMessage(event.sender.id, { text: `Hello ${profie.first_name}!` }, function (err) {
+            if (err)
+                console.log(`error sending message: ${err}`)
+        })        
+    })    
 }
 
 function handlePostback(event) {
@@ -96,6 +104,27 @@ function sendMessage(recipient, payload, cb) {
         cb(null, body)
     })
 }
+
+
+function getProfile(id, cb) {
+    if (!cb) cb = Function.prototype
+
+    request({
+        method: 'GET',
+        uri: `https://graph.facebook.com/v2.6/${id}`,
+        qs: {
+            fields: 'first_name,last_name,profile_pic,locale,timezone,gender',
+            access_token: settings.access_token
+        },
+        json: true
+    }, (err, res, body) => {
+        if (err) return cb(err)
+        if (body.error) return cb(body.error)
+
+        cb(null, body)
+    })
+}
+
 
 // Send rich message with kitten
 // function kittenMessage(recipientId, text) {
