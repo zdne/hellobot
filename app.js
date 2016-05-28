@@ -1,19 +1,14 @@
 'use strict'
 const bodyParser = require('body-parser');
 const request = require('request');
+const Config = require('./lib/config')
 
 var app = require('express')();
 
-const settings = {
-    port: process.env.PORT || 3000,
-    access_token: process.env.FB_PAGES_ACCESS_TOKEN || "0xdeadbeef",
-    verify: process.env.FB_MESSENGER_VERIFY_TOKEN || "0xdeadbeef"
-}
-
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
-app.listen(settings.port)
-console.log(`app listening on port ${settings.port}`)
+app.listen(Config.port)
+console.log(`app listening on port ${Config.port}`)
 
 // API root
 app.get('/', function (req, res) {
@@ -91,7 +86,7 @@ function sendMessage(recipient, payload, cb) {
         method: 'POST',
         uri: 'https://graph.facebook.com/v2.6/me/messages',
         qs: {
-            access_token: settings.access_token
+            access_token: Config.access_token
         },
         json: {
             recipient: { id: recipient },
@@ -113,7 +108,7 @@ function getProfile(id, cb) {
         uri: `https://graph.facebook.com/v2.6/${id}`,
         qs: {
             fields: 'first_name,last_name,profile_pic,locale,timezone,gender',
-            access_token: settings.access_token
+            access_token: Config.access_token
         },
         json: true
     }, (err, res, body) => {
