@@ -65,7 +65,10 @@ app.post('/webhook', function (req, res) {
 
 // Handle incoming message
 function handleMessage(event) {
-    sendMessage(event.sender.id, {text: `${event.message.text}`})
+    sendMessage(event.sender.id, {text: `${event.message.text}`}, function (err) {
+        if (err) 
+            console.log(`error sending message: ${err}`)
+    })
 }
 
 function handlePostback(event) {
