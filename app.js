@@ -61,13 +61,13 @@ app.post('/webhook', (req, res) => {
 // Handle incoming message
 function handleMessage(event) {
     
-    getProfile(event.sender.id, (err, profie) => {
+    getProfile(event.sender.id, (err, profile) => {
         if (err) {
-            console.log(`error retrieving user profie: ${err}`)
+            console.log(`error retrieving user profile: ${err}`)
             return
         }
                     
-        sendMessage(event.sender.id, { text: `Hello ${profie.first_name}!` }, (err) => {
+        sendMessage(event.sender.id, { text: `Hello ${profile.first_name}!` }, (err) => {
             if (err)
                 console.log(`error sending message: ${err}`)
         })        
