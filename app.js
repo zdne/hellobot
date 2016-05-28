@@ -6,7 +6,7 @@ var app = require('express')();
 
 const settings = {
     port: process.env.PORT || 3000,
-    token: process.env.FB_PAGES_ACCESS_TOKEN || "0xdeadbeef",
+    access_token: process.env.FB_PAGES_ACCESS_TOKEN || "0xdeadbeef",
     verify: process.env.FB_MESSENGER_VERIFY_TOKEN || "0xdeadbeef"
 }
 
@@ -83,7 +83,7 @@ function sendMessage(recipient, payload, cb) {
         method: 'POST',
         uri: 'https://graph.facebook.com/v2.6/me/messages',
         qs: {
-            access_token: settings.FB_PAGES_ACCESS_TOKEN
+            access_token: settings.access_token
         },
         json: {
             recipient: { id: recipient },
