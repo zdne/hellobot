@@ -43,8 +43,9 @@ app.post('/webhook', (req, res) => {
     res.end(JSON.stringify({ status: 'ok' }))
 })
 
-http.createServer(app).listen((process.env.PORT || 3000))
-console.log('App running on http://localhost:' + port);
+const port = process.env.PORT || 3000
+http.createServer(app).listen(port)
+console.log('app running on http://localhost:' + port)
 
 
 /*
