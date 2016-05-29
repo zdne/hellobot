@@ -4,7 +4,7 @@
   "description": "Hello Bot",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha --recursive",
     "start": "node app.js"
   },
   "repository": {
@@ -22,5 +22,9 @@
     "express": "^4.13.4",
     "request": "^2.72.0",
     "sequelize": "^3.23.3"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.5.3"
   }
 }
