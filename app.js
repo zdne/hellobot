@@ -12,6 +12,7 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.listen(Config.port, () => {
     console.log(`app listening on port ${Config.port}`)
+    console.log(`using "${Config.facebookAPIHost}" as the FB Graph API host`)
 })
 
 // API root
@@ -21,15 +22,18 @@ app.get('/', (req, res) => {
 
 // Facebook webhook verification
 app.get('/webhook', (req, res) => {
+    
     if (req.query['hub.verify_token'] === process.env.FB_MESSENGER_VERIFY_TOKEN) {
         res.send(req.query['hub.challenge'])
-    } else {
+    } 
+    else {
         res.send('invalid verification token')
     }
 })
 
 // Handler for receiving events
 app.post('/webhook', (req, res) => {
+    
     let entries = req.body.entry
 
     entries.forEach((entry) => {
@@ -63,9 +67,10 @@ app.post('/webhook', (req, res) => {
 })
 
 function handleMessage(event) {
-
+    
     let userProfile = db.findUserProfile(event.sender.id)     
     if(userProfile) {
+        
         // Existing user, greet him
         messenger.sendMessage(event.sender.id, { text: `Good to see you again ${userProfile.firstName}!` }, (err) => {
             if (err)
@@ -75,6 +80,7 @@ function handleMessage(event) {
     else {
         // New user, retrieve info and greet
         messenger.getUserProfile(event.sender.id, (err, profile) => {
+            
             if (err) {
                 console.log(`error retrieving user profile: ${err}`)
                 return
