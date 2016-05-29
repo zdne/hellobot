@@ -3,6 +3,8 @@ const bodyParser = require('body-parser')
 const Config = require('./lib/config')
 const messenger = require('./lib/messenger')
 
+const UserProfile = require('./lib/schema')
+
 var app = require('express')()
 
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -61,12 +63,15 @@ app.post('/webhook', (req, res) => {
 
 function handleMessage(event) {
     messenger.getUserProfile(event.sender.id, (err, profile) => {
+        
+        user = new UserProfile(profile)
+        
         if (err) {
             console.log(`error retrieving user profile: ${err}`)
             return
         }
                     
-        messenger.sendMessage(event.sender.id, { text: `Hello ${profile.first_name}!` }, (err) => {
+        messenger.sendMessage(event.sender.id, { text: `Hello ${user.first_name}!` }, (err) => {
             if (err)
                 console.log(`error sending message: ${err}`)
         })        
