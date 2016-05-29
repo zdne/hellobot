@@ -50,9 +50,9 @@ describe('App Schema', () => {
             
             it('will not add the same profile again', () => {
                 let profile = Schema.db.addUserProfile(profileFixture, 42)
-                
                 expect(profile).to.exist
                 expect(Schema.db.userProfiles.length).to.equal(1)
+                expect(profile.firstName).to.be.equal('Peter')
             })            
         })
         
@@ -60,6 +60,7 @@ describe('App Schema', () => {
             it('finds existing id', () => {
                 let profile = Schema.db.findUserProfile(42)
                 expect(profile).to.exist
+                expect(profile.firstName).to.be.equal('Peter')
             })
             
             it('will not find non-existent id', () => {
