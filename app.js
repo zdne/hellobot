@@ -68,7 +68,9 @@ function handleMessage(event) {
             console.log(`error retrieving user profile: ${err}`)
             return
         }
-        
+
+        console.log(profile)
+        console.log(JSON.stringify(profile,"",0))
         user = new UserProfile(profile)
         messenger.sendMessage(event.sender.id, { text: `Hello ${user.first_name}!` }, (err) => {
             if (err)
