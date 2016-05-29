@@ -4,6 +4,7 @@ const Config = require('./lib/config')
 const messenger = require('./lib/messenger')
 
 const UserProfile = require('./lib/schema').UserProfile
+const db = require('./lib/schema').db
 
 var app = require('express')()
 
@@ -62,19 +63,30 @@ app.post('/webhook', (req, res) => {
 })
 
 function handleMessage(event) {
-    messenger.getUserProfile(event.sender.id, (err, profile) => {
 
-        if (err) {
-            console.log(`error retrieving user profile: ${err}`)
-            return
-        }
-
-        let user = new UserProfile(profile)
-        messenger.sendMessage(event.sender.id, { text: `Hello ${user.first_name}!` }, (err) => {
+    let userProfile = db.findUserProfile(event.sender.id)     
+    if(userProfile) {
+        // Existing user, greet him
+        messenger.sendMessage(event.sender.id, { text: `Good to see you again ${user.firstName}!` }, (err) => {
             if (err)
                 console.log(`error sending message: ${err}`)
         })
-    })
+    }
+    else {
+        // New user, retrieve info and greet
+        messenger.getUserProfile(event.sender.id, (err, profile) => {
+            if (err) {
+                console.log(`error retrieving user profile: ${err}`)
+                return
+            }
+
+            db.addUserProfile(profile, event.sender.id)
+            messenger.sendMessage(event.sender.id, { text: `Hello ${user.firstName}, it's great to meet you!` }, (err) => {
+                if (err)
+                    console.log(`error sending message: ${err}`)
+            })
+        })        
+    }
 }
 
 function handlePostback(event) {
