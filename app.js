@@ -42,7 +42,7 @@ app.post('/webhook', (req, res) => {
 
             // handle postbacks
             if (event.postback) {
-                handlePostback(event)
+                Bot.postbackDispatcher(event)
             }
 
             // handle message delivered
@@ -61,6 +61,3 @@ app.post('/webhook', (req, res) => {
     res.end(JSON.stringify({ status: 'ok' }))
 })
 
-function handlePostback(event) {
-    console.log('postback handle not implemented')
-}
