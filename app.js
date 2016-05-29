@@ -10,7 +10,7 @@ var app = require('express')()
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.listen(Config.port, () => {
-    console.log(`app listening on port ${Config.port}`)    
+    console.log(`app listening on port ${Config.port}`)
 })
 
 // API root
@@ -63,20 +63,18 @@ app.post('/webhook', (req, res) => {
 
 function handleMessage(event) {
     messenger.getUserProfile(event.sender.id, (err, profile) => {
-        
+
         if (err) {
             console.log(`error retrieving user profile: ${err}`)
             return
         }
 
-        // console.log(profile)
-        // console.log(JSON.stringify(profile,"",0))
         let user = new UserProfile(profile)
         messenger.sendMessage(event.sender.id, { text: `Hello ${user.first_name}!` }, (err) => {
             if (err)
                 console.log(`error sending message: ${err}`)
-        })        
-    })    
+        })
+    })
 }
 
 function handlePostback(event) {
