@@ -67,7 +67,6 @@ function handleMessage(event) {
     let userProfile = db.findUserProfile(event.sender.id)     
     if(userProfile) {
         // Existing user, greet him
-        console.log(JSON.stringify(userProfile, " ", 0))
         messenger.sendMessage(event.sender.id, { text: `Good to see you again ${userProfile.firstName}!` }, (err) => {
             if (err)
                 console.log(`error sending message: ${err}`)
@@ -81,8 +80,7 @@ function handleMessage(event) {
                 return
             }
 
-            userProfile = db.addUserProfile(event.sender.id, event.sender.id)
-            console.log(JSON.stringify(userProfile, " ", 0))
+            userProfile = db.addUserProfile(profile, event.sender.id)
             messenger.sendMessage(event.sender.id, { text: `Hello ${userProfile.firstName}, it's great to meet you!` }, (err) => {
                 if (err)
                     console.log(`error sending message: ${err}`)
