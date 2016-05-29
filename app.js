@@ -7,8 +7,9 @@ var app = require('express')()
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
-app.listen(Config.port)
-console.log(`app listening on port ${Config.port}`)
+app.listen(Config.port, () => {
+    console.log(`app listening on port ${Config.port}`)    
+})
 
 // API root
 app.get('/', (req, res) => {
@@ -17,7 +18,7 @@ app.get('/', (req, res) => {
 
 // Facebook webhook verification
 app.get('/webhook', (req, res) => {
-    if (req.query['hub.verify_token'] === FB_MESSENGER_VERIFY_TOKEN) {
+    if (req.query['hub.verify_token'] === process.env.FB_MESSENGER_VERIFY_TOKEN) {
         res.send(req.query['hub.challenge'])
     } else {
         res.send('invalid verification token')
