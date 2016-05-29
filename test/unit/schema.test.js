@@ -3,7 +3,7 @@ const expect = require('chai').expect
 const fs = require('fs')
 const path = require('path')
 
-const Schema = require('../lib/schema')
+const Schema = require('../../lib/schema')
 
 describe('User Profile', () => {
     context('initialized with ctor', () => {
@@ -11,7 +11,7 @@ describe('User Profile', () => {
         let userProfile = null
         
         before(() => {
-            const profileFixturePath = path.join(__dirname, 'fixtures', 'userprofile.json')
+            const profileFixturePath = path.join(__dirname, '..', 'fixtures', 'userprofile.json')
             const profileFixture = JSON.parse(fs.readFileSync(profileFixturePath, 'utf8'))
             userProfile = new Schema.UserProfile(profileFixture)
         })
