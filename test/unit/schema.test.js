@@ -47,6 +47,13 @@ describe('App Schema', () => {
             it('has one profile', () => {
                 expect(Schema.db.userProfiles.length).to.equal(1)
             })
+            
+            it('will not add the same profile again', () => {
+                let profile = Schema.db.addUserProfile(profileFixture, 42)
+                
+                expect(profile).to.exist
+                expect(Schema.db.userProfiles.length).to.equal(1)
+            })            
         })
         
         describe('find user by profile id', () => {

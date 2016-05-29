@@ -80,8 +80,8 @@ function handleMessage(event) {
                 return
             }
 
-            db.addUserProfile(profile, event.sender.id)
-            messenger.sendMessage(event.sender.id, { text: `Hello ${user.firstName}, it's great to meet you!` }, (err) => {
+            let userProfile = db.addUserProfile(event.sender.id, event.sender.id)
+            messenger.sendMessage(event.sender.id, { text: `Hello ${userProfile.firstName}, it's great to meet you!` }, (err) => {
                 if (err)
                     console.log(`error sending message: ${err}`)
             })
